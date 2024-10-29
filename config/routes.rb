@@ -1,6 +1,4 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-
-  # Defines the root path route ("/")
-  # root "articles#index"
+  get 'transactions/by_month', to: 'transactions#by_month'
+  get 'transactions/by_date_range', to: 'transactions#by_date_range'
 end
