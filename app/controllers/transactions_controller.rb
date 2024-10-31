@@ -29,4 +29,20 @@ class TransactionsController < ApplicationController
     # Render the transactions as JSON
     render json: @transactions
   end
+
+  def search
+    # Ensure date parameter is present
+    if params[:date].present?
+      # Parse the date to ensure valid formatting and to avoid SQL injection
+      begin
+        date = Date.parse(params[:date])
+        @transactions = Transaction.where(date: date)
+        render json: @transactions
+      rescue ArgumentError
+        render json: { error: 'Invalid date format' }, status: :unprocessable_entity
+      end
+    else
+      render json: { error: 'Date parameter is required' }, status: :bad_request
+    end
+  end
 end
