@@ -1,4 +1,26 @@
 class TransactionsController < ApplicationController
+  skip_before_action :verify_authenticity_token
+  before_action :set_transaction, only: [:destroy]
+
+  def create
+    @transaction = Transaction.new(transaction_params)
+    
+    if @transaction.save
+      render json: @transaction, status: :created
+    else
+      render json: @transaction.errors, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    @transaction.destroy
+    if @transaction.destroyed?
+      render json: { message: 'Transaction deleted successfully' }, status: :ok
+    else
+      render json: @transaction.errors, status: :unprocessable_entity
+    end
+  end
+
   def by_month
     month_year = params[:month_year]
     date = Date.strptime(month_year, "%B %Y") 
@@ -44,5 +66,17 @@ class TransactionsController < ApplicationController
     else
       render json: { error: 'Date parameter is required' }, status: :bad_request
     end
+  end
+
+  private
+  # Only allow a trusted parameter "white list" through.
+  def transaction_params
+    params.require(:transaction).permit(:date, :amount, :description, :category)
+  end
+
+  def set_transaction
+    @transaction = Transaction.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: 'Transaction not found' }, status: :not_found
   end
 end
