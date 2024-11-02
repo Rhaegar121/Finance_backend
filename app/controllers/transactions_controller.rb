@@ -1,12 +1,20 @@
 class TransactionsController < ApplicationController
   skip_before_action :verify_authenticity_token
-  before_action :set_transaction, only: [:destroy]
+  before_action :set_transaction, only: [:update, :destroy]
 
   def create
     @transaction = Transaction.new(transaction_params)
     
     if @transaction.save
       render json: @transaction, status: :created
+    else
+      render json: @transaction.errors, status: :unprocessable_entity
+    end
+  end
+
+  def update
+    if @transaction.update(transaction_params)
+      render json: { message: 'Transaction updated successfully', transaction: @transaction }, status: :ok
     else
       render json: @transaction.errors, status: :unprocessable_entity
     end
@@ -71,7 +79,7 @@ class TransactionsController < ApplicationController
   private
   # Only allow a trusted parameter "white list" through.
   def transaction_params
-    params.require(:transaction).permit(:date, :amount, :description, :category)
+    params.require(:transaction).permit(:date, :amount, :description, :category, :income)
   end
 
   def set_transaction
