@@ -29,28 +29,19 @@ class TransactionsController < ApplicationController
     end
   end
 
-  def by_month
-    month_year = params[:month_year]
-    date = Date.strptime(month_year, "%B %Y") 
-
-    start_date = date.beginning_of_month
-    end_date = date.end_of_month
-
-    @transactions = Transaction.where(date: start_date..end_date)
-
-    render json: @transactions
-  end
-
-  def by_date_range
-    start_date = params[:start_date]
-    end_date = params[:end_date]
-
-    # Convert string dates to Date objects (assuming the format is YYYY-MM-DD)
-    start_date = Date.parse(start_date)
-    end_date = Date.parse(end_date)
+  def filter
+    if params[:month_year].present?
+      date = Date.strptime(params[:month_year], "%B %Y")
+      start_date = date.beginning_of_month
+      end_date = date.end_of_month
+    elsif params[:start_date].present? && params[:end_date].present?
+      start_date = Date.parse(params[:start_date])
+      end_date = Date.parse(params[:end_date])
+    else
+      render json: { error: 'Invalid or missing parameters' }, status: :bad_request and return
+    end
 
     @transactions = Transaction.where(date: start_date..end_date)
-
     render json: @transactions
   end
 
