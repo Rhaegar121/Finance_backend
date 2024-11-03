@@ -41,8 +41,10 @@ class TransactionsController < ApplicationController
       render json: { error: 'Invalid or missing parameters' }, status: :bad_request and return
     end
 
-    @transactions = Transaction.where(date: start_date..end_date)
-    render json: @transactions
+    income_transactions = Transaction.where(date: start_date..end_date, income: true)
+    expense_transactions = Transaction.where(date: start_date..end_date, income: false)
+
+    render json: { income: income_transactions, expenses: expense_transactions }
   end
 
   def search
@@ -50,8 +52,10 @@ class TransactionsController < ApplicationController
 
       begin
         date = Date.parse(params[:date])
-        @transactions = Transaction.where(date: date)
-        render json: @transactions
+        income_transactions = Transaction.where(date: date, income: true)
+        expense_transactions = Transaction.where(date: date, income: false)
+
+        render json: { income: income_transactions, expenses: expense_transactions }
       rescue ArgumentError
         render json: { error: 'Invalid date format' }, status: :unprocessable_entity
       end
